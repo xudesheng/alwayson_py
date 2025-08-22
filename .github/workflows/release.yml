@@ -37,12 +37,13 @@ jobs:
         uses: PyO3/maturin-action@v1
         with:
           target: ${{ matrix.target }}
-          args: --release --out dist --find-interpreter
+          args: --release --out dist --interpreter python3.12
           sccache: 'true'
           manylinux: auto
+          before-script-linux: |
+            git config --global url."https://${{ secrets.SSO_ENABLED_TOKEN }}@github.com/".insteadOf "https://github.com/"
         env:
           CARGO_NET_GIT_FETCH_WITH_CLI: true
-          GITHUB_TOKEN: ${{ secrets.SSO_ENABLED_TOKEN }}
 
       - name: Upload wheels
         uses: actions/upload-artifact@v4
@@ -73,7 +74,7 @@ jobs:
         uses: PyO3/maturin-action@v1
         with:
           target: ${{ matrix.target }}
-          args: --release --out dist --find-interpreter
+          args: --release --out dist --interpreter python3.12
           sccache: 'true'
         env:
           CARGO_NET_GIT_FETCH_WITH_CLI: true
@@ -108,7 +109,7 @@ jobs:
         uses: PyO3/maturin-action@v1
         with:
           target: ${{ matrix.target }}
-          args: --release --out dist --find-interpreter
+          args: --release --out dist --interpreter python3.12
           sccache: 'true'
         env:
           CARGO_NET_GIT_FETCH_WITH_CLI: true
