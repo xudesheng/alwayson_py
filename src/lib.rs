@@ -126,9 +126,9 @@ impl PyTwPrim {
 
     // TODO: Implement binary serialization once we understand the upstream API better
     // For now, using JSON serialization as a workaround
-    fn to_bytes<'py>(&self, py: Python<'py>) -> PyResult<&'py PyBytes> {
+    fn to_bytes<'py>(&self, py: Python<'py>) -> PyResult<Bound<'py, PyBytes>> {
         let json_str = self.to_json()?;
-        Ok(PyBytes::new(py, json_str.as_bytes()))
+        Ok(PyBytes::new_bound(py, json_str.as_bytes()))
     }
 
     #[staticmethod]
@@ -169,7 +169,7 @@ impl PyTwPrim {
             RustTwPrim::NUMBER(_, v) => Ok(v.to_object(py)),
             RustTwPrim::STRING(_, v) => Ok(v.to_object(py)),
             RustTwPrim::DATETIME(_, v) => Ok(v.to_object(py)),
-            RustTwPrim::BLOB(_, v) => Ok(PyBytes::new(py, v.as_ref()).to_object(py)),
+            RustTwPrim::BLOB(_, v) => Ok(PyBytes::new_bound(py, v.as_ref()).to_object(py)),
             RustTwPrim::NOTHING(_) => Ok(py.None()),
             _ => Err(PyTypeError::new_err("Unsupported type for get_value")),
         }
@@ -226,8 +226,8 @@ impl PyAlwaysOnError {
 
 /// Python bindings for ThingWorx AlwaysOn protocol codec
 #[pymodule]
-fn _native(_py: Python, m: &PyModule) -> PyResult<()> {
-    m.add("__version__", "0.1.0")?;
+fn _native<'py>(_py: Python<'py>, m: &Bound<'py, PyModule>) -> PyResult<()> {
+    m.setattr("__version__", "0.1.0")?;
 
     m.add_class::<PyBaseType>()?;
     m.add_class::<PyTwPrim>()?;
