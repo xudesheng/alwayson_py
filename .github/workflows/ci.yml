@@ -14,8 +14,9 @@ jobs:
     name: Test
     runs-on: ${{ matrix.os }}
     strategy:
+      fail-fast: false
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
+        os: [ubuntu-latest, windows-2022, macos-13]
         python-version: ['3.8', '3.9', '3.10', '3.11', '3.12']
 
     steps:
@@ -31,6 +32,10 @@ jobs:
       - name: Install Rust
         uses: dtolnay/rust-toolchain@stable
 
+      - name: Configure Git for private repos
+        run: |
+          git config --global url."https://${{ secrets.SSO_ENABLED_TOKEN }}@github.com/".insteadOf "https://github.com/"
+
       - name: Cache cargo dependencies
         uses: actions/cache@v4
         with:
@@ -41,10 +46,14 @@ jobs:
           key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
 
       - name: Install maturin
-        run: pip install maturin[patchelf]
+        run: |
+          pip install --upgrade pip
+          pip install maturin
 
       - name: Build and install package
         run: maturin develop
+        env:
+          CARGO_NET_GIT_FETCH_WITH_CLI: true
 
       - name: Test basic import
         run: python -c "import alwayson; print('Version:', alwayson.__version__)"
@@ -106,8 +115,9 @@ jobs:
     name: Build wheels
     runs-on: ${{ matrix.os }}
     strategy:
+      fail-fast: false
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
+        os: [ubuntu-latest, windows-2022, macos-13]
 
     steps:
       - uses: actions/checkout@v4

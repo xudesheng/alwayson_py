@@ -45,7 +45,7 @@ jobs:
           path: dist
 
   windows:
-    runs-on: windows-latest
+    runs-on: windows-2022
     strategy:
       matrix:
         target: [x64]
@@ -74,7 +74,7 @@ jobs:
           path: dist
 
   macos:
-    runs-on: macos-latest
+    runs-on: macos-13
     strategy:
       matrix:
         target: [x86_64, aarch64]
