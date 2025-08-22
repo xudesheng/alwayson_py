@@ -39,11 +39,13 @@ jobs:
           target: ${{ matrix.target }}
           args: --release --out dist --interpreter python3.12
           sccache: 'true'
-          manylinux: auto
+          manylinux: ${{ matrix.target == 'aarch64' && '2_28' || 'auto' }}
           before-script-linux: |
             git config --global url."https://${{ secrets.SSO_ENABLED_TOKEN }}@github.com/".insteadOf "https://github.com/"
+            touch /root/.netrc
         env:
           CARGO_NET_GIT_FETCH_WITH_CLI: true
+          PYO3_USE_ABI3_FORWARD_COMPATIBILITY: 1
 
       - name: Upload wheels
         uses: actions/upload-artifact@v4
@@ -79,6 +81,8 @@ jobs:
         env:
           CARGO_NET_GIT_FETCH_WITH_CLI: true
           GITHUB_TOKEN: ${{ secrets.SSO_ENABLED_TOKEN }}
+          PYO3_USE_ABI3_FORWARD_COMPATIBILITY: 1
+          MACOSX_DEPLOYMENT_TARGET: ${{ matrix.target == 'aarch64' && '11.0' || '' }}
 
       - name: Upload wheels
         uses: actions/upload-artifact@v4
@@ -87,10 +91,15 @@ jobs:
           path: dist
 
   macos:
-    runs-on: macos-13
+    # Build x86_64 on Intel runners and aarch64 on Apple Silicon runners
     strategy:
       matrix:
-        target: [x86_64, aarch64]
+        include:
+          - runner: macos-13
+            target: x86_64
+          - runner: macos-14
+            target: aarch64
+    runs-on: ${{ matrix.runner }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -100,6 +109,7 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
+          architecture: ${{ matrix.target == 'aarch64' && 'arm64' || 'x64' }}
 
       - name: Configure Git for private repos
         run: |
@@ -114,6 +124,7 @@ jobs:
         env:
           CARGO_NET_GIT_FETCH_WITH_CLI: true
           GITHUB_TOKEN: ${{ secrets.SSO_ENABLED_TOKEN }}
+          PYO3_USE_ABI3_FORWARD_COMPATIBILITY: 1
 
       - name: Upload wheels
         uses: actions/upload-artifact@v4
