@@ -47,7 +47,7 @@ jobs:
         run: maturin develop
 
       - name: Test basic import
-        run: python -c "import alwayson; print(f'Version: {alwayson.__version__}')"
+        run: python -c "import alwayson; print('Version:', alwayson.__version__)"
 
       - name: Install test dependencies
         run: |
