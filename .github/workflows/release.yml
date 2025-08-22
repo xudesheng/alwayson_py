@@ -33,6 +33,9 @@ jobs:
         run: |
           git config --global url."https://${{ secrets.SSO_ENABLED_TOKEN }}@github.com/".insteadOf "https://github.com/"
 
+      - name: Create dummy .netrc
+        run: touch ~/.netrc
+
       - name: Build wheels
         uses: PyO3/maturin-action@v1
         with:

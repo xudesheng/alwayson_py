@@ -16,10 +16,10 @@ name = "alwayson_py"
 crate-type = ["cdylib"]
 
 [dependencies]
-pyo3 = { version = "0.20", features = ["extension-module"] }
+pyo3 = { version = "0.22", features = ["extension-module"] }
 alwayson-codec = { git = "https://github.com/xudesheng/alwayson-codec", branch = "alwayson_py" }
 serde_json = "1.0"
 bytes = "1.5"
 
 [build-dependencies]
-pyo3-build-config = "0.20"
+pyo3-build-config = "0.22"
