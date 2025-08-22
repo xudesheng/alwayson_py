@@ -96,6 +96,10 @@ jobs:
         with:
           components: rustfmt, clippy
 
+      - name: Configure Git for private repos
+        run: |
+          git config --global url."https://${{ secrets.SSO_ENABLED_TOKEN }}@github.com/".insteadOf "https://github.com/"
+
       - name: Install Python dependencies
         run: |
           pip install black isort ruff mypy
@@ -147,6 +151,10 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: '3.12'
+
+      - name: Configure Git for private repos
+        run: |
+          git config --global url."https://${{ secrets.SSO_ENABLED_TOKEN }}@github.com/".insteadOf "https://github.com/"
 
       - name: Build wheels
         uses: PyO3/maturin-action@v1
