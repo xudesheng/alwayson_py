@@ -32,7 +32,6 @@ jobs:
       - name: Configure Git for private repos
         run: |
           git config --global url."https://${{ secrets.SSO_ENABLED_TOKEN }}@github.com/".insteadOf "https://github.com/"
-          git config --global net.git-fetch-with-cli true
 
       - name: Build wheels
         uses: PyO3/maturin-action@v1
@@ -41,6 +40,8 @@ jobs:
           args: --release --out dist --find-interpreter
           sccache: 'true'
           manylinux: auto
+        env:
+          CARGO_NET_GIT_FETCH_WITH_CLI: true
 
       - name: Upload wheels
         uses: actions/upload-artifact@v4
@@ -66,7 +67,6 @@ jobs:
       - name: Configure Git for private repos
         run: |
           git config --global url."https://${{ secrets.SSO_ENABLED_TOKEN }}@github.com/".insteadOf "https://github.com/"
-          git config --global net.git-fetch-with-cli true
 
       - name: Build wheels
         uses: PyO3/maturin-action@v1
@@ -99,7 +99,6 @@ jobs:
       - name: Configure Git for private repos
         run: |
           git config --global url."https://${{ secrets.SSO_ENABLED_TOKEN }}@github.com/".insteadOf "https://github.com/"
-          git config --global net.git-fetch-with-cli true
 
       - name: Build wheels
         uses: PyO3/maturin-action@v1
@@ -125,13 +124,14 @@ jobs:
       - name: Configure Git for private repos
         run: |
           git config --global url."https://${{ secrets.SSO_ENABLED_TOKEN }}@github.com/".insteadOf "https://github.com/"
-          git config --global net.git-fetch-with-cli true
 
       - name: Build sdist
         uses: PyO3/maturin-action@v1
         with:
           command: sdist
           args: --out dist
+        env:
+          CARGO_NET_GIT_FETCH_WITH_CLI: true
 
       - name: Upload sdist
         uses: actions/upload-artifact@v4

@@ -36,7 +36,8 @@ jobs:
       - name: Configure Git for private repos
         run: |
           git config --global url."https://${{ secrets.SSO_ENABLED_TOKEN }}@github.com/".insteadOf "https://github.com/"
-          git config --global net.git-fetch-with-cli true
+        env:
+          CARGO_NET_GIT_FETCH_WITH_CLI: true
 
       - name: Cache cargo dependencies
         uses: actions/cache@v4
@@ -47,25 +48,33 @@ jobs:
             target
           key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
 
-      - name: Install maturin
+      - name: Install maturin and create virtual environment
         run: |
           pip install --upgrade pip
           pip install maturin
+          python -m venv .venv
 
       - name: Build and install package
-        run: maturin develop
+        run: |
+          source .venv/bin/activate || .venv\Scripts\activate
+          maturin develop
         env:
           CARGO_NET_GIT_FETCH_WITH_CLI: true
 
       - name: Test basic import
-        run: python -c "import alwayson; print('Version:', alwayson.__version__)"
+        run: |
+          source .venv/bin/activate || .venv\Scripts\activate
+          python -c "import alwayson; print('Version:', alwayson.__version__)"
 
       - name: Install test dependencies
         run: |
+          source .venv/bin/activate || .venv\Scripts\activate
           pip install pytest pytest-asyncio
 
       - name: Run tests
-        run: pytest tests/ -v
+        run: |
+          source .venv/bin/activate || .venv\Scripts\activate
+          pytest tests/ -v
         if: hashFiles('tests/*.py') != ''
 
   lint:
@@ -96,11 +105,17 @@ jobs:
 
       - name: Run Rust clippy
         run: cargo clippy --all-targets --all-features -- -D warnings
+        env:
+          CARGO_NET_GIT_FETCH_WITH_CLI: true
 
       - name: Install maturin and build
         run: |
           pip install maturin
+          python -m venv .venv
+          source .venv/bin/activate || .venv\Scripts\activate
           maturin develop
+        env:
+          CARGO_NET_GIT_FETCH_WITH_CLI: true
 
       - name: Check Python formatting with black
         run: black --check python/
@@ -138,7 +153,8 @@ jobs:
         with:
           args: --release --out dist
           sccache: 'true'
-          token: ${{ secrets.SSO_ENABLED_TOKEN }}
+        env:
+          CARGO_NET_GIT_FETCH_WITH_CLI: true
 
       - name: Upload wheels
         uses: actions/upload-artifact@v4
