@@ -47,9 +47,10 @@ jobs:
           args: --release --out dist --find-interpreter
           sccache: 'true'
           manylinux: auto
-          docker-options: -v $HOME/.netrc:/root/.netrc:ro
+          docker-options: -v /home/runner/.netrc:/root/.netrc:ro
         env:
           CARGO_NET_GIT_FETCH_WITH_CLI: true
+          PYO3_USE_ABI3_FORWARD_COMPATIBILITY: 1
 
       - name: Upload wheels
         uses: actions/upload-artifact@v4
@@ -84,6 +85,7 @@ jobs:
           sccache: 'true'
         env:
           CARGO_NET_GIT_FETCH_WITH_CLI: true
+          PYO3_USE_ABI3_FORWARD_COMPATIBILITY: 1
 
       - name: Upload wheels
         uses: actions/upload-artifact@v4
@@ -118,6 +120,7 @@ jobs:
           sccache: 'true'
         env:
           CARGO_NET_GIT_FETCH_WITH_CLI: true
+          PYO3_USE_ABI3_FORWARD_COMPATIBILITY: 1
 
       - name: Upload wheels
         uses: actions/upload-artifact@v4
@@ -149,9 +152,10 @@ jobs:
         with:
           command: sdist
           args: --out dist
-          docker-options: -v $HOME/.netrc:/root/.netrc:ro
+          docker-options: -v /home/runner/.netrc:/root/.netrc:ro
         env:
           CARGO_NET_GIT_FETCH_WITH_CLI: true
+          PYO3_USE_ABI3_FORWARD_COMPATIBILITY: 1
 
       - name: Upload sdist
         uses: actions/upload-artifact@v4
