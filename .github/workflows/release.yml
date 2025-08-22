@@ -29,6 +29,10 @@ jobs:
         with:
           python-version: '3.x'
 
+      - name: Configure Git for private repos
+        run: |
+          git config --global url."https://${{ secrets.SSO_ENABLED_TOKEN }}@github.com/".insteadOf "https://github.com/"
+
       - name: Build wheels
         uses: PyO3/maturin-action@v1
         with:
@@ -36,7 +40,6 @@ jobs:
           args: --release --out dist --find-interpreter
           sccache: 'true'
           manylinux: auto
-          token: ${{ secrets.SSO_ENABLED_TOKEN }}
 
       - name: Upload wheels
         uses: actions/upload-artifact@v4
@@ -59,13 +62,16 @@ jobs:
         with:
           python-version: '3.x'
 
+      - name: Configure Git for private repos
+        run: |
+          git config --global url."https://${{ secrets.SSO_ENABLED_TOKEN }}@github.com/".insteadOf "https://github.com/"
+
       - name: Build wheels
         uses: PyO3/maturin-action@v1
         with:
           target: ${{ matrix.target }}
           args: --release --out dist --find-interpreter
           sccache: 'true'
-          token: ${{ secrets.SSO_ENABLED_TOKEN }}
 
       - name: Upload wheels
         uses: actions/upload-artifact@v4
@@ -88,13 +94,16 @@ jobs:
         with:
           python-version: '3.x'
 
+      - name: Configure Git for private repos
+        run: |
+          git config --global url."https://${{ secrets.SSO_ENABLED_TOKEN }}@github.com/".insteadOf "https://github.com/"
+
       - name: Build wheels
         uses: PyO3/maturin-action@v1
         with:
           target: ${{ matrix.target }}
           args: --release --out dist --find-interpreter
           sccache: 'true'
-          token: ${{ secrets.SSO_ENABLED_TOKEN }}
 
       - name: Upload wheels
         uses: actions/upload-artifact@v4
@@ -110,12 +119,15 @@ jobs:
           token: ${{ secrets.SSO_ENABLED_TOKEN }}
           submodules: recursive
 
+      - name: Configure Git for private repos
+        run: |
+          git config --global url."https://${{ secrets.SSO_ENABLED_TOKEN }}@github.com/".insteadOf "https://github.com/"
+
       - name: Build sdist
         uses: PyO3/maturin-action@v1
         with:
           command: sdist
           args: --out dist
-          token: ${{ secrets.SSO_ENABLED_TOKEN }}
 
       - name: Upload sdist
         uses: actions/upload-artifact@v4
