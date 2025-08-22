@@ -15,7 +15,8 @@
       "Bash(cargo fmt:*)",
       "Bash(cargo clippy:*)",
       "Bash(git ls-remote:*)",
-      "Bash(curl:*)"
+      "Bash(curl:*)",
+      "Bash(python:*)"
     ],
     "deny": [],
     "ask": []
