@@ -204,7 +204,7 @@ jobs:
       - name: Test wheel installation
         run: |
           # Find any available wheel for testing
-          WHEEL=$(ls dist/alwayson_py-*.whl | head -1)
+          WHEEL=$(ls dist/alwayson_py-*-manylinux*.whl | head -1)
           if [ -n "$WHEEL" ]; then
             echo "Testing wheel: $WHEEL"
             pip install "$WHEEL"
