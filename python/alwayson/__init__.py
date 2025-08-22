@@ -8,8 +8,8 @@ enabling efficient encoding and decoding of ThingWorx AlwaysOn protocol messages
 from ._native import AlwaysOnError, BaseType, TwPrim, __version__
 
 __all__ = [
-    "__version__",
+    "AlwaysOnError",
     "BaseType",
     "TwPrim",
-    "AlwaysOnError",
+    "__version__",
 ]

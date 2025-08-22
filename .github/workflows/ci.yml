@@ -135,7 +135,7 @@ jobs:
         if: hashFiles('python/**/*.py') != ''
 
       - name: Run ruff linter
-        run: ruff python/
+        run: ruff check python/
         if: hashFiles('python/**/*.py') != ''
 
   build:
