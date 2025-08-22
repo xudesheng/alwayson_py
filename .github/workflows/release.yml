@@ -29,9 +29,17 @@ jobs:
         with:
           python-version: '3.x'
 
-      - name: Configure Git for private repos
+      - name: Configure Git for private repos and create credentials
         run: |
           git config --global url."https://${{ secrets.SSO_ENABLED_TOKEN }}@github.com/".insteadOf "https://github.com/"
+          # Create .netrc for Docker container authentication
+          mkdir -p ~/.netrc
+          cat > ~/.netrc << EOF
+          machine github.com
+          login ${{ secrets.SSO_ENABLED_TOKEN }}
+          password x-oauth-basic
+          EOF
+          chmod 600 ~/.netrc
 
       - name: Build wheels
         uses: PyO3/maturin-action@v1
@@ -40,6 +48,7 @@ jobs:
           args: --release --out dist --find-interpreter
           sccache: 'true'
           manylinux: auto
+          container-options: -v $HOME/.netrc:/root/.netrc:ro
         env:
           CARGO_NET_GIT_FETCH_WITH_CLI: true
 
@@ -74,6 +83,8 @@ jobs:
           target: ${{ matrix.target }}
           args: --release --out dist --find-interpreter
           sccache: 'true'
+        env:
+          CARGO_NET_GIT_FETCH_WITH_CLI: true
 
       - name: Upload wheels
         uses: actions/upload-artifact@v4
@@ -106,6 +117,8 @@ jobs:
           target: ${{ matrix.target }}
           args: --release --out dist --find-interpreter
           sccache: 'true'
+        env:
+          CARGO_NET_GIT_FETCH_WITH_CLI: true
 
       - name: Upload wheels
         uses: actions/upload-artifact@v4
@@ -121,15 +134,23 @@ jobs:
           submodules: true
           token: ${{ secrets.SSO_ENABLED_TOKEN }}
 
-      - name: Configure Git for private repos
+      - name: Configure Git for private repos and create credentials
         run: |
           git config --global url."https://${{ secrets.SSO_ENABLED_TOKEN }}@github.com/".insteadOf "https://github.com/"
+          # Create .netrc for Docker container authentication
+          cat > ~/.netrc << EOF
+          machine github.com
+          login ${{ secrets.SSO_ENABLED_TOKEN }}
+          password x-oauth-basic
+          EOF
+          chmod 600 ~/.netrc
 
       - name: Build sdist
         uses: PyO3/maturin-action@v1
         with:
           command: sdist
           args: --out dist
+          container-options: -v $HOME/.netrc:/root/.netrc:ro
         env:
           CARGO_NET_GIT_FETCH_WITH_CLI: true
 
