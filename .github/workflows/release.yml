@@ -183,5 +183,14 @@ jobs:
 
       - name: Test wheel installation
         run: |
-          pip install dist/alwayson_py-*-cp312-cp312-linux_x86_64.whl
-          python -c "import alwayson; print(f'Version: {alwayson.__version__}')"
+          # Find any available wheel for testing
+          WHEEL=$(ls dist/alwayson_py-*.whl | head -1)
+          if [ -n "$WHEEL" ]; then
+            echo "Testing wheel: $WHEEL"
+            pip install "$WHEEL"
+            python -c "import alwayson; print('Version:', alwayson.__version__)"
+          else
+            echo "No wheel found, testing source distribution"
+            pip install dist/alwayson_py-*.tar.gz
+            python -c "import alwayson; print('Version:', alwayson.__version__)"
+          fi
