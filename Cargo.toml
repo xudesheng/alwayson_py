@@ -1,0 +1,25 @@
+[package]
+name = "alwayson_py"
+version = "0.1.0"
+edition = "2021"
+authors = ["Desheng Xu <xudesheng@gmail.com>"]
+description = "Python bindings for ThingWorx AlwaysOn protocol encoding/decoding"
+license = "MIT"
+repository = "https://github.com/xudesheng/alwayson_py"
+homepage = "https://github.com/xudesheng/alwayson_py"
+readme = "README.md"
+keywords = ["thingworx", "iot", "protocol", "python", "alwayson"]
+categories = ["api-bindings", "encoding", "network-programming"]
+
+[lib]
+name = "alwayson_py"
+crate-type = ["cdylib"]
+
+[dependencies]
+pyo3 = { version = "0.20", features = ["extension-module"] }
+alwayson-codec = { git = "https://github.com/xudesheng/alwayson-codec", branch = "alwayson_py" }
+serde_json = "1.0"
+bytes = "1.5"
+
+[build-dependencies]
+pyo3-build-config = "0.20"
