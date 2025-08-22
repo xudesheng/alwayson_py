@@ -47,7 +47,7 @@ jobs:
           args: --release --out dist --find-interpreter
           sccache: 'true'
           manylinux: auto
-          container-options: -v $HOME/.netrc:/root/.netrc:ro
+          docker-options: -v $HOME/.netrc:/root/.netrc:ro
         env:
           CARGO_NET_GIT_FETCH_WITH_CLI: true
 
@@ -149,7 +149,7 @@ jobs:
         with:
           command: sdist
           args: --out dist
-          container-options: -v $HOME/.netrc:/root/.netrc:ro
+          docker-options: -v $HOME/.netrc:/root/.netrc:ro
         env:
           CARGO_NET_GIT_FETCH_WITH_CLI: true
 
