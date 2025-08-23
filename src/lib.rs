@@ -5,13 +5,9 @@ use pyo3::prelude::*;
 use pyo3::types::PyBytes;
 
 use alwayson_codec::{
-    base::BaseType as RustBaseType, 
-    primitive::TwPrim as RustTwPrim,
-    message::tw_message::TwxMsg as RustTwxMsg,
-    event::TwxEvent as RustTwxEvent,
-    service::TwxService as RustTwxService,
-    property::TwxProperty as RustTwxProperty,
-    BytesStream,
+    base::BaseType as RustBaseType, event::TwxEvent as RustTwxEvent,
+    message::tw_message::TwxMsg as RustTwxMsg, primitive::TwPrim as RustTwPrim,
+    property::TwxProperty as RustTwxProperty, service::TwxService as RustTwxService, BytesStream,
 };
 use bytes::{Bytes, BytesMut};
 
@@ -136,7 +132,10 @@ impl PyTwPrim {
         let mut content = BytesMut::new();
         match self.inner.to_bytes(&mut content) {
             Ok(_) => Ok(PyBytes::new_bound(py, &content)),
-            Err(e) => Err(PyValueError::new_err(format!("Binary serialization error: {}", e))),
+            Err(e) => Err(PyValueError::new_err(format!(
+                "Binary serialization error: {}",
+                e
+            ))),
         }
     }
 
@@ -144,7 +143,10 @@ impl PyTwPrim {
     fn from_bytes(data: &[u8]) -> PyResult<Self> {
         match RustTwPrim::from_bytes(data) {
             Ok((prim, _consumed)) => Ok(PyTwPrim { inner: prim }),
-            Err(e) => Err(PyValueError::new_err(format!("Binary deserialization error: {}", e))),
+            Err(e) => Err(PyValueError::new_err(format!(
+                "Binary deserialization error: {}",
+                e
+            ))),
         }
     }
 
@@ -223,7 +225,10 @@ impl PyTwxMessage {
     fn from_bytes(data: &[u8]) -> PyResult<Self> {
         match RustTwxMsg::from_bytes(data) {
             Ok((msg, _consumed)) => Ok(PyTwxMessage { inner: msg }),
-            Err(e) => Err(PyValueError::new_err(format!("Message deserialization error: {}", e))),
+            Err(e) => Err(PyValueError::new_err(format!(
+                "Message deserialization error: {}",
+                e
+            ))),
         }
     }
 
@@ -231,7 +236,10 @@ impl PyTwxMessage {
         let mut content = BytesMut::new();
         match self.inner.to_bytes(&mut content) {
             Ok(_) => Ok(PyBytes::new_bound(py, &content)),
-            Err(e) => Err(PyValueError::new_err(format!("Message serialization error: {}", e))),
+            Err(e) => Err(PyValueError::new_err(format!(
+                "Message serialization error: {}",
+                e
+            ))),
         }
     }
 
@@ -303,7 +311,10 @@ impl PyTwxEvent {
     fn from_json(json_str: &str) -> PyResult<Self> {
         match serde_json::from_str::<RustTwxEvent>(json_str) {
             Ok(event) => Ok(PyTwxEvent { inner: event }),
-            Err(e) => Err(PyValueError::new_err(format!("Event JSON deserialization error: {}", e))),
+            Err(e) => Err(PyValueError::new_err(format!(
+                "Event JSON deserialization error: {}",
+                e
+            ))),
         }
     }
 
@@ -335,11 +346,17 @@ impl PyTwxEvent {
     }
 
     fn __str__(&self) -> String {
-        format!("TwxEvent(name='{}', description='{}')", self.inner.name, self.inner.description)
+        format!(
+            "TwxEvent(name='{}', description='{}')",
+            self.inner.name, self.inner.description
+        )
     }
 
     fn __repr__(&self) -> String {
-        format!("TwxEvent(name='{}', description='{}')", self.inner.name, self.inner.description)
+        format!(
+            "TwxEvent(name='{}', description='{}')",
+            self.inner.name, self.inner.description
+        )
     }
 }
 
@@ -355,7 +372,10 @@ impl PyTwxService {
     fn from_json(json_str: &str) -> PyResult<Self> {
         match serde_json::from_str::<RustTwxService>(json_str) {
             Ok(service) => Ok(PyTwxService { inner: service }),
-            Err(e) => Err(PyValueError::new_err(format!("Service JSON deserialization error: {}", e))),
+            Err(e) => Err(PyValueError::new_err(format!(
+                "Service JSON deserialization error: {}",
+                e
+            ))),
         }
     }
 
@@ -364,7 +384,9 @@ impl PyTwxService {
         // Try to interpret bytes as UTF-8 JSON string
         match std::str::from_utf8(data) {
             Ok(json_str) => Self::from_json(json_str),
-            Err(_) => Err(PyValueError::new_err("Service data is not valid UTF-8 JSON")),
+            Err(_) => Err(PyValueError::new_err(
+                "Service data is not valid UTF-8 JSON",
+            )),
         }
     }
 
@@ -387,11 +409,17 @@ impl PyTwxService {
     }
 
     fn __str__(&self) -> String {
-        format!("TwxService(name='{}', description='{}')", self.inner.name, self.inner.description)
+        format!(
+            "TwxService(name='{}', description='{}')",
+            self.inner.name, self.inner.description
+        )
     }
 
     fn __repr__(&self) -> String {
-        format!("TwxService(name='{}', description='{}')", self.inner.name, self.inner.description)
+        format!(
+            "TwxService(name='{}', description='{}')",
+            self.inner.name, self.inner.description
+        )
     }
 }
 
@@ -407,7 +435,10 @@ impl PyTwxProperty {
     fn from_json(json_str: &str) -> PyResult<Self> {
         match serde_json::from_str::<RustTwxProperty>(json_str) {
             Ok(property) => Ok(PyTwxProperty { inner: property }),
-            Err(e) => Err(PyValueError::new_err(format!("Property JSON deserialization error: {}", e))),
+            Err(e) => Err(PyValueError::new_err(format!(
+                "Property JSON deserialization error: {}",
+                e
+            ))),
         }
     }
 
@@ -416,7 +447,9 @@ impl PyTwxProperty {
         // Try to interpret bytes as UTF-8 JSON string
         match std::str::from_utf8(data) {
             Ok(json_str) => Self::from_json(json_str),
-            Err(_) => Err(PyValueError::new_err("Property data is not valid UTF-8 JSON")),
+            Err(_) => Err(PyValueError::new_err(
+                "Property data is not valid UTF-8 JSON",
+            )),
         }
     }
 
@@ -447,13 +480,17 @@ impl PyTwxProperty {
     }
 
     fn __str__(&self) -> String {
-        format!("TwxProperty(name='{}', base_type='{:?}', threshold={})", 
-                self.inner.name, self.inner.basetype, self.inner.push_threshold)
+        format!(
+            "TwxProperty(name='{}', base_type='{:?}', threshold={})",
+            self.inner.name, self.inner.basetype, self.inner.push_threshold
+        )
     }
 
     fn __repr__(&self) -> String {
-        format!("TwxProperty(name='{}', base_type='{:?}', threshold={})", 
-                self.inner.name, self.inner.basetype, self.inner.push_threshold)
+        format!(
+            "TwxProperty(name='{}', base_type='{:?}', threshold={})",
+            self.inner.name, self.inner.basetype, self.inner.push_threshold
+        )
     }
 }
 
