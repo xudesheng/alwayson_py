@@ -116,3 +116,9 @@ select = [
     "RUF",
 ]
 ignore = ["S101", "PLR0913", "COM812", "ISC001"]
+
+[dependency-groups]
+dev = [
+    "black>=24.8.0",
+    "isort>=5.13.2",
+]

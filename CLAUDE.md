@@ -403,6 +403,41 @@ Python bindings should maintain 80-90% of native Rust performance.
 - Python: Use `black`, `isort`, and `ruff` for formatting and linting
 - Type hints required for all public APIs
 
+### Pre-Commit Requirements
+**IMPORTANT**: Before committing and pushing any code changes, ALWAYS run these checks IN ORDER:
+
+1. **Rust Clippy Check**: 
+   ```bash
+   cargo clippy --all-targets --all-features -- -D warnings
+   ```
+   - This ensures no clippy warnings or errors
+   - Fix any issues found or add appropriate `#[allow()]` attributes for false positives
+
+2. **Rust Format Check**:
+   ```bash
+   cargo fmt --all -- --check
+   ```
+   - This ensures proper Rust code formatting
+   - If this fails, run `cargo fmt --all` to automatically fix formatting
+
+3. **Python Format Check (Black)**:
+   ```bash
+   uv run black --check python/
+   ```
+   - This ensures proper Python code formatting
+   - If this fails, run `uv run black python/` to automatically fix formatting
+   - Make sure black is installed: `uv add --dev black`
+
+4. **Python Import Sort Check (isort)**:
+   ```bash
+   uv run isort --check-only python/
+   ```
+   - This ensures Python imports are properly sorted and organized
+   - If this fails, run `uv run isort python/` to automatically fix import order
+   - Make sure isort is installed: `uv add --dev isort`
+
+**All four checks MUST pass before any code is committed.** This ensures code quality, consistency, and prevents CI/CD pipeline failures.
+
 ### Testing
 - Unit tests for all public APIs
 - Integration tests with real ThingWorx data
