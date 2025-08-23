@@ -20,9 +20,9 @@ __all__ = [
     "AlwaysOnError",
     "BaseType",
     "TwPrim",
-    "TwxMessage",
     "TwxEvent",
-    "TwxService",
+    "TwxMessage",
     "TwxProperty",
+    "TwxService",
     "__version__",
 ]

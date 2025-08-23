@@ -436,7 +436,15 @@ Python bindings should maintain 80-90% of native Rust performance.
    - If this fails, run `uv run isort python/` to automatically fix import order
    - Make sure isort is installed: `uv add --dev isort`
 
-**All four checks MUST pass before any code is committed.** This ensures code quality, consistency, and prevents CI/CD pipeline failures.
+5. **Python Lint Check (ruff)**:
+   ```bash
+   uv run ruff check python/
+   ```
+   - This ensures Python code follows linting rules and best practices
+   - If this fails, run `uv run ruff check --fix python/` to automatically fix issues
+   - Make sure ruff is installed: `uv add --dev ruff`
+
+**All five checks MUST pass before any code is committed.** This ensures code quality, consistency, and prevents CI/CD pipeline failures.
 
 ### Testing
 - Unit tests for all public APIs

@@ -36,6 +36,7 @@ dev = [
     { name = "black", version = "25.1.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.9'" },
     { name = "isort", version = "5.13.2", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.9'" },
     { name = "isort", version = "6.0.1", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.9'" },
+    { name = "ruff" },
 ]
 
 [package.metadata]
@@ -54,6 +55,7 @@ provides-extras = ["dev"]
 dev = [
     { name = "black", specifier = ">=24.8.0" },
     { name = "isort", specifier = ">=5.13.2" },
+    { name = "ruff", specifier = ">=0.12.10" },
 ]
 
 [[package]]
