@@ -1,4 +1,6 @@
 #![allow(non_local_definitions)]
+#![allow(clippy::useless_conversion)]
+#![allow(clippy::uninlined_format_args)]
 
 use pyo3::exceptions::{PyTypeError, PyValueError};
 use pyo3::prelude::*;
