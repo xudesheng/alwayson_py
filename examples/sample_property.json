@@ -1,0 +1,13 @@
+{
+  "name": "TotalFlow",
+  "pushThreshold": 0,
+  "pushType": "ALWAYS",
+  "startType": "readEdgeValue",
+  "baseType": "NUMBER",
+  "aspects": {
+    "pushType": "ALWAYS",
+    "pushThreshold": 0,
+    "isReadOnly": true,
+    "isLogged": true
+  }
+}

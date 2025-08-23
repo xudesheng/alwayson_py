@@ -9,8 +9,11 @@ resolution-markers = [
 
 [[package]]
 name = "alwayson-py"
-version = "0.1.0"
+version = "0.1.1"
 source = { editable = "." }
+dependencies = [
+    { name = "avro-python3" },
+]
 
 [package.optional-dependencies]
 dev = [
@@ -29,6 +32,7 @@ dev = [
 
 [package.metadata]
 requires-dist = [
+    { name = "avro-python3", specifier = ">=1.10.2" },
     { name = "black", marker = "extra == 'dev'", specifier = ">=23.0" },
     { name = "isort", marker = "extra == 'dev'", specifier = ">=5.12" },
     { name = "mypy", marker = "extra == 'dev'", specifier = ">=1.0" },
@@ -37,6 +41,12 @@ requires-dist = [
     { name = "ruff", marker = "extra == 'dev'", specifier = ">=0.1" },
 ]
 provides-extras = ["dev"]
+
+[[package]]
+name = "avro-python3"
+version = "1.10.2"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/cc/97/7a6970380ca8db9139a3cc0b0e3e0dd3e4bc584fb3644e1d06e71e1a55f0/avro-python3-1.10.2.tar.gz", hash = "sha256:3b63f24e6b04368c3e4a6f923f484be0230d821aad65ac36108edbff29e9aaab", size = 38701, upload-time = "2021-03-17T10:43:56.97Z" }
 
 [[package]]
 name = "backports-asyncio-runner"

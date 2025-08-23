@@ -4,8 +4,16 @@ use pyo3::exceptions::{PyTypeError, PyValueError};
 use pyo3::prelude::*;
 use pyo3::types::PyBytes;
 
-use alwayson_codec::{base::BaseType as RustBaseType, primitive::TwPrim as RustTwPrim};
-use bytes::Bytes;
+use alwayson_codec::{
+    base::BaseType as RustBaseType, 
+    primitive::TwPrim as RustTwPrim,
+    message::tw_message::TwxMsg as RustTwxMsg,
+    event::TwxEvent as RustTwxEvent,
+    service::TwxService as RustTwxService,
+    property::TwxProperty as RustTwxProperty,
+    BytesStream,
+};
+use bytes::{Bytes, BytesMut};
 
 #[pyclass(name = "BaseType")]
 #[derive(Clone, Debug)]
@@ -124,19 +132,20 @@ impl PyTwPrim {
         })
     }
 
-    // TODO: Implement binary serialization once we understand the upstream API better
-    // For now, using JSON serialization as a workaround
     fn to_bytes<'py>(&self, py: Python<'py>) -> PyResult<Bound<'py, PyBytes>> {
-        let json_str = self.to_json()?;
-        Ok(PyBytes::new_bound(py, json_str.as_bytes()))
+        let mut content = BytesMut::new();
+        match self.inner.to_bytes(&mut content) {
+            Ok(_) => Ok(PyBytes::new_bound(py, &content)),
+            Err(e) => Err(PyValueError::new_err(format!("Binary serialization error: {}", e))),
+        }
     }
 
     #[staticmethod]
-    fn from_bytes(_data: &[u8]) -> PyResult<Self> {
-        // TODO: Implement binary deserialization once we understand the upstream API better
-        Err(PyValueError::new_err(
-            "Binary deserialization not yet implemented",
-        ))
+    fn from_bytes(data: &[u8]) -> PyResult<Self> {
+        match RustTwPrim::from_bytes(data) {
+            Ok((prim, _consumed)) => Ok(PyTwPrim { inner: prim }),
+            Err(e) => Err(PyValueError::new_err(format!("Binary deserialization error: {}", e))),
+        }
     }
 
     fn to_json(&self) -> PyResult<String> {
@@ -202,6 +211,252 @@ impl PyTwPrim {
     }
 }
 
+#[pyclass(name = "TwxMessage")]
+#[derive(Clone, Debug)]
+pub struct PyTwxMessage {
+    inner: RustTwxMsg,
+}
+
+#[pymethods]
+impl PyTwxMessage {
+    #[staticmethod]
+    fn from_bytes(data: &[u8]) -> PyResult<Self> {
+        match RustTwxMsg::from_bytes(data) {
+            Ok((msg, _consumed)) => Ok(PyTwxMessage { inner: msg }),
+            Err(e) => Err(PyValueError::new_err(format!("Message deserialization error: {}", e))),
+        }
+    }
+
+    fn to_bytes<'py>(&self, py: Python<'py>) -> PyResult<Bound<'py, PyBytes>> {
+        let mut content = BytesMut::new();
+        match self.inner.to_bytes(&mut content) {
+            Ok(_) => Ok(PyBytes::new_bound(py, &content)),
+            Err(e) => Err(PyValueError::new_err(format!("Message serialization error: {}", e))),
+        }
+    }
+
+    fn get_message_type(&self) -> String {
+        match &self.inner {
+            RustTwxMsg::Request(_, _) => "Request".to_string(),
+            RustTwxMsg::Response(_, _) => "Response".to_string(),
+            RustTwxMsg::Auth(_, _) => "Auth".to_string(),
+            RustTwxMsg::Bind(_, _) => "Bind".to_string(),
+        }
+    }
+
+    fn get_request_id(&self) -> u32 {
+        self.inner.get_requestid()
+    }
+
+    fn get_session_id(&self) -> u32 {
+        self.inner.get_sessionid()
+    }
+
+    fn get_endpoint(&self) -> u32 {
+        self.inner.get_endpoint()
+    }
+
+    fn is_request(&self) -> bool {
+        self.inner.is_request()
+    }
+
+    fn is_response(&self) -> bool {
+        self.inner.is_response()
+    }
+
+    fn is_auth(&self) -> bool {
+        matches!(self.inner, RustTwxMsg::Auth(_, _))
+    }
+
+    fn is_bind(&self) -> bool {
+        self.inner.is_bind()
+    }
+
+    fn short_description(&self) -> String {
+        self.inner.short_desc()
+    }
+
+    #[staticmethod]
+    fn build_auth(request_id: u32, app_key: String) -> PyResult<Self> {
+        let msg = RustTwxMsg::build_auth_msg(request_id, &app_key);
+        Ok(PyTwxMessage { inner: msg })
+    }
+
+    fn __str__(&self) -> String {
+        self.short_description()
+    }
+
+    fn __repr__(&self) -> String {
+        format!("TwxMessage({})", self.get_message_type())
+    }
+}
+
+#[pyclass(name = "TwxEvent")]
+#[derive(Clone, Debug)]
+pub struct PyTwxEvent {
+    inner: RustTwxEvent,
+}
+
+#[pymethods]
+impl PyTwxEvent {
+    #[staticmethod]
+    fn from_json(json_str: &str) -> PyResult<Self> {
+        match serde_json::from_str::<RustTwxEvent>(json_str) {
+            Ok(event) => Ok(PyTwxEvent { inner: event }),
+            Err(e) => Err(PyValueError::new_err(format!("Event JSON deserialization error: {}", e))),
+        }
+    }
+
+    #[staticmethod]
+    fn from_bytes(data: &[u8]) -> PyResult<Self> {
+        // Try to interpret bytes as UTF-8 JSON string
+        match std::str::from_utf8(data) {
+            Ok(json_str) => Self::from_json(json_str),
+            Err(_) => Err(PyValueError::new_err("Event data is not valid UTF-8 JSON")),
+        }
+    }
+
+    fn to_bytes<'py>(&self, py: Python<'py>) -> PyResult<Bound<'py, PyBytes>> {
+        let json_str = self.to_json()?;
+        Ok(PyBytes::new_bound(py, json_str.as_bytes()))
+    }
+
+    fn get_name(&self) -> String {
+        self.inner.name.clone()
+    }
+
+    fn get_description(&self) -> String {
+        self.inner.description.clone()
+    }
+
+    fn to_json(&self) -> PyResult<String> {
+        serde_json::to_string(&self.inner)
+            .map_err(|e| PyValueError::new_err(format!("JSON serialization error: {e}")))
+    }
+
+    fn __str__(&self) -> String {
+        format!("TwxEvent(name='{}', description='{}')", self.inner.name, self.inner.description)
+    }
+
+    fn __repr__(&self) -> String {
+        format!("TwxEvent(name='{}', description='{}')", self.inner.name, self.inner.description)
+    }
+}
+
+#[pyclass(name = "TwxService")]
+#[derive(Clone, Debug)]
+pub struct PyTwxService {
+    inner: RustTwxService,
+}
+
+#[pymethods]
+impl PyTwxService {
+    #[staticmethod]
+    fn from_json(json_str: &str) -> PyResult<Self> {
+        match serde_json::from_str::<RustTwxService>(json_str) {
+            Ok(service) => Ok(PyTwxService { inner: service }),
+            Err(e) => Err(PyValueError::new_err(format!("Service JSON deserialization error: {}", e))),
+        }
+    }
+
+    #[staticmethod]
+    fn from_bytes(data: &[u8]) -> PyResult<Self> {
+        // Try to interpret bytes as UTF-8 JSON string
+        match std::str::from_utf8(data) {
+            Ok(json_str) => Self::from_json(json_str),
+            Err(_) => Err(PyValueError::new_err("Service data is not valid UTF-8 JSON")),
+        }
+    }
+
+    fn to_bytes<'py>(&self, py: Python<'py>) -> PyResult<Bound<'py, PyBytes>> {
+        let json_str = self.to_json()?;
+        Ok(PyBytes::new_bound(py, json_str.as_bytes()))
+    }
+
+    fn get_name(&self) -> String {
+        self.inner.name.clone()
+    }
+
+    fn get_description(&self) -> String {
+        self.inner.description.clone()
+    }
+
+    fn to_json(&self) -> PyResult<String> {
+        serde_json::to_string(&self.inner)
+            .map_err(|e| PyValueError::new_err(format!("JSON serialization error: {e}")))
+    }
+
+    fn __str__(&self) -> String {
+        format!("TwxService(name='{}', description='{}')", self.inner.name, self.inner.description)
+    }
+
+    fn __repr__(&self) -> String {
+        format!("TwxService(name='{}', description='{}')", self.inner.name, self.inner.description)
+    }
+}
+
+#[pyclass(name = "TwxProperty")]
+#[derive(Clone, Debug)]
+pub struct PyTwxProperty {
+    inner: RustTwxProperty,
+}
+
+#[pymethods]
+impl PyTwxProperty {
+    #[staticmethod]
+    fn from_json(json_str: &str) -> PyResult<Self> {
+        match serde_json::from_str::<RustTwxProperty>(json_str) {
+            Ok(property) => Ok(PyTwxProperty { inner: property }),
+            Err(e) => Err(PyValueError::new_err(format!("Property JSON deserialization error: {}", e))),
+        }
+    }
+
+    #[staticmethod]
+    fn from_bytes(data: &[u8]) -> PyResult<Self> {
+        // Try to interpret bytes as UTF-8 JSON string
+        match std::str::from_utf8(data) {
+            Ok(json_str) => Self::from_json(json_str),
+            Err(_) => Err(PyValueError::new_err("Property data is not valid UTF-8 JSON")),
+        }
+    }
+
+    fn to_bytes<'py>(&self, py: Python<'py>) -> PyResult<Bound<'py, PyBytes>> {
+        let json_str = self.to_json()?;
+        Ok(PyBytes::new_bound(py, json_str.as_bytes()))
+    }
+
+    fn get_name(&self) -> String {
+        self.inner.name.clone()
+    }
+
+    fn get_base_type(&self) -> String {
+        format!("{:?}", self.inner.basetype)
+    }
+
+    fn get_push_threshold(&self) -> f64 {
+        self.inner.push_threshold
+    }
+
+    fn should_read_edge_value(&self) -> bool {
+        self.inner.should_read_edge_value()
+    }
+
+    fn to_json(&self) -> PyResult<String> {
+        serde_json::to_string(&self.inner)
+            .map_err(|e| PyValueError::new_err(format!("JSON serialization error: {e}")))
+    }
+
+    fn __str__(&self) -> String {
+        format!("TwxProperty(name='{}', base_type='{:?}', threshold={})", 
+                self.inner.name, self.inner.basetype, self.inner.push_threshold)
+    }
+
+    fn __repr__(&self) -> String {
+        format!("TwxProperty(name='{}', base_type='{:?}', threshold={})", 
+                self.inner.name, self.inner.basetype, self.inner.push_threshold)
+    }
+}
+
 #[pyclass(name = "AlwaysOnError")]
 #[derive(Debug)]
 pub struct PyAlwaysOnError {
@@ -227,10 +482,14 @@ impl PyAlwaysOnError {
 /// Python bindings for ThingWorx AlwaysOn protocol codec
 #[pymodule]
 fn _native<'py>(_py: Python<'py>, m: &Bound<'py, PyModule>) -> PyResult<()> {
-    m.setattr("__version__", "0.1.0")?;
+    m.setattr("__version__", "0.1.1")?;
 
     m.add_class::<PyBaseType>()?;
     m.add_class::<PyTwPrim>()?;
+    m.add_class::<PyTwxMessage>()?;
+    m.add_class::<PyTwxEvent>()?;
+    m.add_class::<PyTwxService>()?;
+    m.add_class::<PyTwxProperty>()?;
     m.add_class::<PyAlwaysOnError>()?;
 
     Ok(())

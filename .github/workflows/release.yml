@@ -6,9 +6,9 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: 'Version to release'
+        description: "Version to release"
         required: true
-        default: '0.1.0'
+        default: "0.1.1"
 
 permissions:
   contents: read
@@ -27,7 +27,7 @@ jobs:
 
       - uses: actions/setup-python@v5
         with:
-          python-version: '3.12'
+          python-version: "3.12"
 
       - name: Configure Git for private repos
         run: |
@@ -38,7 +38,7 @@ jobs:
         with:
           target: ${{ matrix.target }}
           args: --release --out dist --interpreter python3.12
-          sccache: 'false'
+          sccache: "false"
           manylinux: ${{ matrix.target == 'aarch64' && '2_28' || 'auto' }}
           before-script-linux: |
             git config --global url."https://${{ secrets.SSO_ENABLED_TOKEN }}@github.com/".insteadOf "https://github.com/"
@@ -66,7 +66,7 @@ jobs:
 
       - uses: actions/setup-python@v5
         with:
-          python-version: '3.12'
+          python-version: "3.12"
 
       - name: Configure Git for private repos
         run: |
@@ -77,7 +77,7 @@ jobs:
         with:
           target: ${{ matrix.target }}
           args: --release --out dist --interpreter python3.12
-          sccache: 'false'
+          sccache: "false"
         env:
           CARGO_NET_GIT_FETCH_WITH_CLI: true
           GITHUB_TOKEN: ${{ secrets.SSO_ENABLED_TOKEN }}
@@ -108,7 +108,7 @@ jobs:
 
       - uses: actions/setup-python@v5
         with:
-          python-version: '3.12'
+          python-version: "3.12"
           architecture: ${{ matrix.target == 'aarch64' && 'arm64' || 'x64' }}
 
       - name: Configure Git for private repos
@@ -120,7 +120,7 @@ jobs:
         with:
           target: ${{ matrix.target }}
           args: --release --out dist --interpreter python3.12
-          sccache: 'false'
+          sccache: "false"
         env:
           CARGO_NET_GIT_FETCH_WITH_CLI: true
           GITHUB_TOKEN: ${{ secrets.SSO_ENABLED_TOKEN }}

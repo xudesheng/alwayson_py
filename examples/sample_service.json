@@ -1,0 +1,43 @@
+{
+  "name": "GetSteamSensorReadings",
+  "description": "Returns a set of readings as in InfoTable",
+  "aspects": {},
+  "Inputs": {
+    "name": "InputParameters",
+    "aspects": {},
+    "fieldDefinitions": {}
+  },
+  "Outputs": {
+    "name": "SteamSensorReadingShape",
+    "baseType": "INFOTABLE",
+    "aspects": {
+      "dataShape": "SteamSensorReadingShape"
+    },
+    "fieldDefinitions": {
+      "ActivationTime": {
+        "name": "ActivationTime",
+        "description": "",
+        "baseType": "DATETIME",
+        "aspects": {}
+      },
+      "Temperature": {
+        "name": "Temperature",
+        "description": "",
+        "baseType": "NUMBER",
+        "aspects": {}
+      },
+      "Pressure": {
+        "name": "Pressure",
+        "description": "",
+        "baseType": "NUMBER",
+        "aspects": {}
+      },
+      "FaultStatus": {
+        "name": "FaultStatus",
+        "description": "",
+        "baseType": "BOOLEAN",
+        "aspects": {}
+      }
+    }
+  }
+}

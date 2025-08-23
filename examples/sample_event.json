@@ -1,0 +1,19 @@
+{
+  "name": "SteamSensorFault",
+  "aspects": {},
+  "description": "Steam sensor event",
+  "EventData": {
+    "name": "SteamSensorFault",
+    "aspects": {
+      "dataShape": "SteamSensorFault"
+    },
+    "fieldDefinitions": {
+      "message": {
+        "name": "message",
+        "description": "",
+        "baseType": "STRING",
+        "aspects": {}
+      }
+    }
+  }
+}

@@ -70,7 +70,7 @@ pub enum TwPrim {
 }
 ```
 
-**Python API Goal**:
+**Python API Implementation** ✅:
 ```python
 from alwayson import TwPrim, BaseType
 
@@ -79,9 +79,10 @@ value = TwPrim.string("Hello World")
 number = TwPrim.number(42.5)
 boolean = TwPrim.boolean(True)
 
-# Serialize/deserialize
+# Serialize/deserialize (IMPLEMENTED)
 json_str = value.to_json()
 bytes_data = value.to_bytes()
+decoded = TwPrim.from_bytes(bytes_data)
 ```
 
 #### 2. Message Types (`TwxMsg`)
@@ -257,28 +258,27 @@ chrono = "0.4"
 ## Build Instructions
 
 ### Development Setup
-```bash
-# Create virtual environment
-python -m venv venv
-source venv/bin/activate  # or `venv\Scripts\activate` on Windows
+**Requirements**: This project uses `uv` package manager with Python 3.12.
 
-# Install maturin
-pip install maturin[patchelf]
+```bash
+# Install uv (if not already installed)
+curl -LsSf https://astral.sh/uv/install.sh | sh  # Linux/macOS
+# or: powershell -c "irm https://astral.sh/uv/install.ps1 | iex"  # Windows
 
 # Development build
-maturin develop
+uv run maturin develop
 
-# Production build
-maturin build --release
+# Production build  
+uv run maturin build --release
 ```
 
 ### Testing
 ```bash
-# Install test dependencies
-pip install pytest pytest-asyncio
+# Run tests with uv
+uv run pytest tests/
 
-# Run tests
-pytest tests/
+# Test basic functionality
+uv run python -c "import alwayson; print('Version:', alwayson.__version__)"
 ```
 
 ## Repository References
@@ -324,6 +324,10 @@ import alwayson
 auth = alwayson.TwxMessage.build_auth(12345, "app-key")
 binary_data = auth.to_bytes()
 print(f"Message size: {len(binary_data)} bytes")
+
+# Decode binary message
+decoded = alwayson.TwxMessage.from_bytes(binary_data)
+print(f"Message type: {decoded.get_message_type()}")
 ```
 
 ### 2. InfoTable Manipulation
@@ -381,12 +385,15 @@ Python bindings should maintain 80-90% of native Rust performance.
 ## Development Status
 
 - [x] Project structure created
-- [x] Build configuration setup
+- [x] Build configuration setup  
 - [x] Dependencies configured
-- [ ] Core type bindings (in progress)
-- [ ] Message system implementation
-- [ ] Data structure wrappers
-- [ ] Advanced features
+- [x] Core type bindings (`TwPrim`, `BaseType`)
+- [x] Binary serialization/deserialization support
+- [x] Message system implementation (`TwxMessage`)
+- [x] Authentication message support
+- [x] PyPI package published (v0.1.1)
+- [ ] Data structure wrappers (`InfoTable`, `DataShape`)
+- [ ] Advanced features (multipart messages, events)
 - [ ] Documentation and examples
 
 ## Contributing

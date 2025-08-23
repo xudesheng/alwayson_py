@@ -16,7 +16,12 @@
       "Bash(cargo clippy:*)",
       "Bash(git ls-remote:*)",
       "Bash(curl:*)",
-      "Bash(python:*)"
+      "Bash(python:*)",
+      "WebSearch",
+      "WebFetch(domain:pypi.org)",
+      "Bash(find:*)",
+      "Bash(source:*)",
+      "Bash(uv add:*)"
     ],
     "deny": [],
     "ask": []

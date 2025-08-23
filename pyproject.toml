@@ -4,11 +4,11 @@ build-backend = "maturin"
 
 [project]
 name = "alwayson_py"
-version = "0.1.0"
+version = "0.1.1"
 description = "Python bindings for ThingWorx AlwaysOn protocol encoding/decoding"
-authors = [{name = "Desheng Xu", email = "xudesheng@gmail.com"}]
+authors = [{ name = "Desheng Xu", email = "xudesheng@gmail.com" }]
 readme = "README.md"
-license = {file = "LICENSE"}
+license = { file = "LICENSE" }
 keywords = ["thingworx", "iot", "protocol", "alwayson", "codec"]
 classifiers = [
     "Development Status :: 3 - Alpha",
@@ -26,7 +26,9 @@ classifiers = [
     "Topic :: Software Development :: Libraries :: Python Modules",
 ]
 requires-python = ">=3.8"
-dependencies = []
+dependencies = [
+    "avro-python3>=1.10.2",
+]
 
 [project.optional-dependencies]
 dev = [
@@ -67,5 +69,50 @@ line-length = 88
 target-version = "py38"
 
 [tool.ruff.lint]
-select = ["E", "F", "W", "C90", "I", "N", "UP", "YTT", "S", "BLE", "FBT", "B", "A", "COM", "C4", "DTZ", "T10", "EM", "EXE", "FA", "ISC", "ICN", "G", "INP", "PIE", "T20", "PYI", "PT", "Q", "RSE", "RET", "SLF", "SIM", "TID", "TCH", "ARG", "PTH", "ERA", "PGH", "PL", "TRY", "FLY", "NPY", "RUF"]
+select = [
+    "E",
+    "F",
+    "W",
+    "C90",
+    "I",
+    "N",
+    "UP",
+    "YTT",
+    "S",
+    "BLE",
+    "FBT",
+    "B",
+    "A",
+    "COM",
+    "C4",
+    "DTZ",
+    "T10",
+    "EM",
+    "EXE",
+    "FA",
+    "ISC",
+    "ICN",
+    "G",
+    "INP",
+    "PIE",
+    "T20",
+    "PYI",
+    "PT",
+    "Q",
+    "RSE",
+    "RET",
+    "SLF",
+    "SIM",
+    "TID",
+    "TCH",
+    "ARG",
+    "PTH",
+    "ERA",
+    "PGH",
+    "PL",
+    "TRY",
+    "FLY",
+    "NPY",
+    "RUF",
+]
 ignore = ["S101", "PLR0913", "COM812", "ISC001"]
