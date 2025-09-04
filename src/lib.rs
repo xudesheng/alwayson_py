@@ -666,7 +666,32 @@ impl PyInfoTable {
     }
 
     fn to_json(&self) -> PyResult<String> {
-        // Convert InfoTable to JSON representation
+        self.to_json_with_depth(0)
+    }
+}
+
+impl PyInfoTable {
+    fn to_json_with_depth(&self, depth: usize) -> PyResult<String> {
+        let json_value = self
+            .to_json_value_with_depth(depth)
+            .map_err(|e| PyValueError::new_err(format!("JSON conversion error: {e}")))?;
+        serde_json::to_string(&json_value)
+            .map_err(|e| PyValueError::new_err(format!("JSON serialization error: {e}")))
+    }
+
+    fn to_json_value_with_depth(&self, depth: usize) -> Result<serde_json::Value, String> {
+        const MAX_DEPTH: usize = 5;
+
+        if depth >= MAX_DEPTH {
+            // At max depth, return simplified representation
+            return Ok(serde_json::json!({
+                "type": "InfoTable",
+                "rows": self.inner.rows.len(),
+                "fields": self.inner.datashape.entries.len(),
+                "note": "Max depth reached"
+            }));
+        }
+
         let mut json_table = serde_json::Map::new();
 
         // Add data shape information
@@ -685,20 +710,82 @@ impl PyInfoTable {
         }
         json_table.insert("dataShape".to_string(), serde_json::Value::Object(fields));
 
-        // Add rows data - simplified for now
+        // Add rows data with full field expansion
         let mut rows_array = Vec::new();
         for row in &self.inner.rows {
             let mut row_obj = serde_json::Map::new();
-            row_obj.insert(
-                "fields_count".to_string(),
-                serde_json::Value::Number(row.fields.len().into()),
-            );
+
+            // Get field names from datashape for proper mapping
+            let field_names: Vec<String> = self.inner.datashape.entries.keys().cloned().collect();
+
+            for (field_idx, prim_value) in row.fields.iter().enumerate() {
+                let field_name = if field_idx < field_names.len() {
+                    field_names[field_idx].clone()
+                } else {
+                    format!("field_{}", field_idx)
+                };
+
+                // Convert TwPrim value to JSON with depth limiting
+                match Self::twprim_to_json_value_with_depth(prim_value, depth + 1) {
+                    Ok(json_val) => {
+                        row_obj.insert(field_name, json_val);
+                    }
+                    Err(_) => {
+                        // If conversion fails, use a string representation
+                        row_obj.insert(
+                            field_name,
+                            serde_json::Value::String(format!("{:?}", prim_value)),
+                        );
+                    }
+                }
+            }
             rows_array.push(serde_json::Value::Object(row_obj));
         }
         json_table.insert("rows".to_string(), serde_json::Value::Array(rows_array));
 
-        serde_json::to_string(&json_table)
-            .map_err(|e| PyValueError::new_err(format!("JSON serialization error: {e}")))
+        Ok(serde_json::Value::Object(json_table))
+    }
+
+    // Helper method to convert TwPrim to JSON with depth limiting
+    fn twprim_to_json_value_with_depth(
+        prim: &RustTwPrim,
+        depth: usize,
+    ) -> Result<serde_json::Value, String> {
+        const MAX_DEPTH: usize = 5;
+
+        match prim {
+            RustTwPrim::BOOLEAN(_, v) => Ok(serde_json::Value::Bool(*v)),
+            RustTwPrim::INTEGER(_, v) => Ok(serde_json::Value::Number((*v).into())),
+            RustTwPrim::LONG(_, v) => Ok(serde_json::Value::Number((*v).into())),
+            RustTwPrim::NUMBER(_, v) => serde_json::Number::from_f64(*v)
+                .map(serde_json::Value::Number)
+                .ok_or_else(|| "Invalid float value".to_string()),
+            RustTwPrim::STRING(_, v) => Ok(serde_json::Value::String(v.clone())),
+            RustTwPrim::DATETIME(_, v) => Ok(serde_json::Value::Number((*v).into())),
+            RustTwPrim::BLOB(_, _) => Ok(serde_json::Value::String("[BLOB data]".to_string())),
+            RustTwPrim::NOTHING(_) => Ok(serde_json::Value::Null),
+            RustTwPrim::VARIANT(_, boxed_prim) => {
+                // Recursively convert the variant content
+                Self::twprim_to_json_value_with_depth(boxed_prim, depth)
+            }
+            RustTwPrim::INFOTABLE(_, nested_infotable) => {
+                if depth >= MAX_DEPTH {
+                    Ok(serde_json::json!({
+                        "type": "InfoTable",
+                        "rows": nested_infotable.rows.len(),
+                        "fields": nested_infotable.datashape.entries.len(),
+                        "note": "Max depth reached"
+                    }))
+                } else {
+                    // Create a PyInfoTable wrapper and convert recursively
+                    let nested_wrapper = PyInfoTable {
+                        inner: (**nested_infotable).clone(),
+                    };
+                    nested_wrapper.to_json_value_with_depth(depth)
+                }
+            }
+            _ => Err("Unsupported type in InfoTable row".to_string()),
+        }
     }
 
     fn __str__(&self) -> String {
@@ -744,7 +831,7 @@ impl PyAlwaysOnError {
 /// Python bindings for ThingWorx AlwaysOn protocol codec
 #[pymodule]
 fn _native<'py>(_py: Python<'py>, m: &Bound<'py, PyModule>) -> PyResult<()> {
-    m.setattr("__version__", "0.4.0")?;
+    m.setattr("__version__", "0.5.0")?;
 
     m.add_class::<PyBaseType>()?;
     m.add_class::<PyTwPrim>()?;

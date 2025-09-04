@@ -47,7 +47,10 @@
       "Read(/C:\\Users\\dxu\\Documents\\github\\rust\\alwayson_py/**)",
       "Read(/C:\\Users\\dxu\\Documents\\github\\rust\\alwayson_py\\python\\alwayson/**)",
       "Read(/C:\\Users\\dxu\\Documents\\github\\rust\\alwayson_py/**)",
-      "Read(/C:\\Users\\dxu\\Documents\\github\\rust\\alwayson_py/**)"
+      "Read(/C:\\Users\\dxu\\Documents\\github\\rust\\alwayson_py/**)",
+      "Read(/C:\\Users\\dxu\\Documents\\github\\rust\\alwayson_py\\src/**)",
+      "Bash(isort:*)",
+      "Bash(ruff check:*)"
     ],
     "deny": [],
     "ask": []
