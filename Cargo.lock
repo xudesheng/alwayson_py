@@ -39,7 +39,7 @@ dependencies = [
 
 [[package]]
 name = "alwayson_py"
-version = "0.2.1"
+version = "0.2.2"
 dependencies = [
  "alwayson-codec",
  "bytes",

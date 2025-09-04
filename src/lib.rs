@@ -242,6 +242,13 @@ impl PyTwPrim {
             RustTwPrim::DATETIME(_, v) => Ok(serde_json::Value::Number((*v).into())),
             RustTwPrim::BLOB(_, _) => Err(PyTypeError::new_err("Cannot convert BLOB to JSON")),
             RustTwPrim::NOTHING(_) => Ok(serde_json::Value::Null),
+            RustTwPrim::VARIANT(_, boxed_prim) => {
+                // Recursively convert the inner primitive to JSON
+                let wrapped_prim = PyTwPrim {
+                    inner: (**boxed_prim).clone(),
+                };
+                wrapped_prim.to_json_value()
+            }
             _ => Err(PyTypeError::new_err("Cannot convert to JSON")),
         }
     }
@@ -553,7 +560,7 @@ impl PyAlwaysOnError {
 /// Python bindings for ThingWorx AlwaysOn protocol codec
 #[pymodule]
 fn _native<'py>(_py: Python<'py>, m: &Bound<'py, PyModule>) -> PyResult<()> {
-    m.setattr("__version__", "0.2.1")?;
+    m.setattr("__version__", "0.2.2")?;
 
     m.add_class::<PyBaseType>()?;
     m.add_class::<PyTwPrim>()?;
