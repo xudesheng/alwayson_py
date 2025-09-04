@@ -21,7 +21,10 @@
       "WebFetch(domain:pypi.org)",
       "Bash(find:*)",
       "Bash(source:*)",
-      "Bash(uv add:*)"
+      "Bash(uv add:*)",
+      "Bash(black:*)",
+      "Read(/C:\\Users\\dxu\\Documents\\github\\rust\\alwayson_py\\src/**)",
+      "Read(/C:\\Users\\dxu\\Documents\\github\\rust\\alwayson_py/**)"
     ],
     "deny": [],
     "ask": []
