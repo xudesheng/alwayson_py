@@ -648,7 +648,7 @@ impl PyAlwaysOnError {
 /// Python bindings for ThingWorx AlwaysOn protocol codec
 #[pymodule]
 fn _native<'py>(_py: Python<'py>, m: &Bound<'py, PyModule>) -> PyResult<()> {
-    m.setattr("__version__", "0.3.0")?;
+    m.setattr("__version__", "0.3.1")?;
 
     m.add_class::<PyBaseType>()?;
     m.add_class::<PyTwPrim>()?;
