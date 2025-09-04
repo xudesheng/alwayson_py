@@ -1,14 +1,15 @@
 name: Release
 
 on:
-  release:
-    types: [published]
+  push:
+    tags:
+      - 'v[0-9]+.[0-9]+.[0-9]+'
   workflow_dispatch:
     inputs:
       version:
         description: "Version to release"
         required: true
-        default: "0.1.1"
+        default: "0.2.0"
 
 permissions:
   contents: read
@@ -159,11 +160,66 @@ jobs:
           name: wheels-sdist
           path: dist
 
+  validate-tag:
+    name: Validate Tag
+    runs-on: ubuntu-latest
+    if: "startsWith(github.ref, 'refs/tags/')"
+    outputs:
+      version-valid: ${{ steps.check-version.outputs.valid }}
+      tag-version: ${{ steps.extract-version.outputs.version }}
+      cargo-version: ${{ steps.cargo-version.outputs.version }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: true
+          token: ${{ secrets.SSO_ENABLED_TOKEN }}
+
+      - name: Extract version from tag
+        id: extract-version
+        run: |
+          TAG_NAME=${GITHUB_REF#refs/tags/}
+          echo "Tag name: $TAG_NAME"
+          if [[ $TAG_NAME =~ ^v([0-9]+\.[0-9]+\.[0-9]+)$ ]]; then
+            VERSION=${BASH_REMATCH[1]}
+            echo "version=$VERSION" >> $GITHUB_OUTPUT
+            echo "Extracted version: $VERSION"
+          else
+            echo "Invalid tag format: $TAG_NAME (expected: vX.Y.Z)"
+            exit 1
+          fi
+
+      - name: Get Cargo.toml version
+        id: cargo-version
+        run: |
+          CARGO_VERSION=$(grep '^version = ' Cargo.toml | head -1 | sed 's/version = "\(.*\)"/\1/')
+          echo "version=$CARGO_VERSION" >> $GITHUB_OUTPUT
+          echo "Cargo.toml version: $CARGO_VERSION"
+
+      - name: Check version match
+        id: check-version
+        run: |
+          TAG_VERSION="${{ steps.extract-version.outputs.version }}"
+          CARGO_VERSION="${{ steps.cargo-version.outputs.version }}"
+          
+          echo "Comparing versions:"
+          echo "  Tag version: $TAG_VERSION"
+          echo "  Cargo version: $CARGO_VERSION"
+          
+          if [ "$TAG_VERSION" = "$CARGO_VERSION" ]; then
+            echo "✅ Versions match!"
+            echo "valid=true" >> $GITHUB_OUTPUT
+          else
+            echo "❌ Version mismatch!"
+            echo "Tag version ($TAG_VERSION) does not match Cargo.toml version ($CARGO_VERSION)"
+            echo "valid=false" >> $GITHUB_OUTPUT
+            exit 1
+          fi
+
   release:
     name: Release
     runs-on: ubuntu-latest
-    if: "startsWith(github.ref, 'refs/tags/')"
-    needs: [linux, windows, macos, sdist]
+    if: "startsWith(github.ref, 'refs/tags/') && needs.validate-tag.outputs.version-valid == 'true'"
+    needs: [validate-tag, linux, windows, macos, sdist]
     environment:
       name: pypi
       url: https://pypi.org/p/alwayson_py

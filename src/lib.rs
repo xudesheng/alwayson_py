@@ -186,7 +186,9 @@ impl PyTwPrim {
             RustTwPrim::NOTHING(_) => Ok(py.None()),
             RustTwPrim::VARIANT(_, boxed_prim) => {
                 // Recursively get the value from the wrapped primitive
-                let wrapped_prim = PyTwPrim { inner: (**boxed_prim).clone() };
+                let wrapped_prim = PyTwPrim {
+                    inner: (**boxed_prim).clone(),
+                };
                 wrapped_prim.get_value(py)
             }
             _ => Err(PyTypeError::new_err("Unsupported type for get_value")),
@@ -207,9 +209,9 @@ impl PyTwPrim {
 
     fn unwrap_variant(&self, _py: Python) -> PyResult<PyTwPrim> {
         match &self.inner {
-            RustTwPrim::VARIANT(_, boxed_prim) => {
-                Ok(PyTwPrim { inner: (**boxed_prim).clone() })
-            }
+            RustTwPrim::VARIANT(_, boxed_prim) => Ok(PyTwPrim {
+                inner: (**boxed_prim).clone(),
+            }),
             _ => Err(PyTypeError::new_err("TwPrim is not a VARIANT type")),
         }
     }
@@ -217,7 +219,9 @@ impl PyTwPrim {
     fn get_inner_type(&self) -> String {
         match &self.inner {
             RustTwPrim::VARIANT(_, boxed_prim) => {
-                let wrapped_prim = PyTwPrim { inner: (**boxed_prim).clone() };
+                let wrapped_prim = PyTwPrim {
+                    inner: (**boxed_prim).clone(),
+                };
                 wrapped_prim.get_type()
             }
             _ => self.get_type(),
@@ -549,7 +553,7 @@ impl PyAlwaysOnError {
 /// Python bindings for ThingWorx AlwaysOn protocol codec
 #[pymodule]
 fn _native<'py>(_py: Python<'py>, m: &Bound<'py, PyModule>) -> PyResult<()> {
-    m.setattr("__version__", "0.2.0")?;
+    m.setattr("__version__", "0.2.1")?;
 
     m.add_class::<PyBaseType>()?;
     m.add_class::<PyTwPrim>()?;
