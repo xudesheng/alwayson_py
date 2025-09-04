@@ -43,6 +43,7 @@ version = "0.3.0"
 dependencies = [
  "alwayson-codec",
  "bytes",
+ "indexmap",
  "pyo3",
  "pyo3-build-config",
  "serde_json",

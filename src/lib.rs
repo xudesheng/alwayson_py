@@ -7,7 +7,8 @@ use pyo3::prelude::*;
 use pyo3::types::PyBytes;
 
 use alwayson_codec::{
-    base::BaseType as RustBaseType, event::TwxEvent as RustTwxEvent,
+    base::BaseType as RustBaseType, datashape::DataShape as RustDataShape,
+    event::TwxEvent as RustTwxEvent, infotable::InfoTable as RustInfoTable,
     message::tw_message::TwxMsg as RustTwxMsg, primitive::TwPrim as RustTwPrim,
     property::TwxProperty as RustTwxProperty, service::TwxService as RustTwxService, BytesStream,
 };
@@ -130,6 +131,26 @@ impl PyTwPrim {
         })
     }
 
+    #[staticmethod]
+    fn infotable_empty() -> PyResult<Self> {
+        // Create an empty InfoTable with no fields and no rows
+        use indexmap::IndexMap;
+
+        let datashape = RustDataShape {
+            name: Some("EmptyDataShape".to_string()),
+            entries: IndexMap::new(),
+        };
+
+        let infotable = RustInfoTable {
+            datashape,
+            rows: Vec::new(),
+        };
+
+        Ok(PyTwPrim {
+            inner: RustTwPrim::INFOTABLE(RustBaseType::INFOTABLE, Box::new(infotable)),
+        })
+    }
+
     fn to_bytes<'py>(&self, py: Python<'py>) -> PyResult<Bound<'py, PyBytes>> {
         let mut content = BytesMut::new();
         match self.inner.to_bytes(&mut content) {
@@ -188,6 +209,16 @@ impl PyTwPrim {
             RustTwPrim::STRING(_, v) => Ok(v.to_object(py)),
             RustTwPrim::DATETIME(_, v) => Ok(v.to_object(py)),
             RustTwPrim::BLOB(_, v) => Ok(PyBytes::new_bound(py, v.as_ref()).to_object(py)),
+            RustTwPrim::INFOTABLE(_, infotable) => {
+                // For now, return a simple string representation of the InfoTable
+                // TODO: Implement proper InfoTable Python wrapper
+                let info_str = format!(
+                    "InfoTable(rows={}, fields={})",
+                    infotable.rows.len(),
+                    infotable.datashape.entries.len()
+                );
+                Ok(info_str.to_object(py))
+            }
             RustTwPrim::NOTHING(_) => Ok(py.None()),
             RustTwPrim::VARIANT(_, boxed_prim) => {
                 // Recursively get the value from the wrapped primitive
@@ -258,6 +289,46 @@ impl PyTwPrim {
             RustTwPrim::STRING(_, v) => Ok(serde_json::Value::String(v.clone())),
             RustTwPrim::DATETIME(_, v) => Ok(serde_json::Value::Number((*v).into())),
             RustTwPrim::BLOB(_, _) => Err(PyTypeError::new_err("Cannot convert BLOB to JSON")),
+            RustTwPrim::INFOTABLE(_, infotable) => {
+                // Convert InfoTable to JSON - this is complex as it contains nested TwPrim values
+                let mut json_table = serde_json::Map::new();
+
+                // Add data shape information
+                let mut fields = serde_json::Map::new();
+                for (field_name, field_def) in &infotable.datashape.entries {
+                    let mut field_info = serde_json::Map::new();
+                    field_info.insert(
+                        "baseType".to_string(),
+                        serde_json::Value::String(format!("{:?}", field_def.entry_type)),
+                    );
+                    field_info.insert(
+                        "description".to_string(),
+                        serde_json::Value::String(field_def.description.clone()),
+                    );
+                    fields.insert(field_name.clone(), serde_json::Value::Object(field_info));
+                }
+                json_table.insert("dataShape".to_string(), serde_json::Value::Object(fields));
+
+                // Add rows data - simplified approach
+                let mut rows_array = Vec::new();
+                for row in &infotable.rows {
+                    let mut row_obj = serde_json::Map::new();
+                    // For now, just add row info without deep field processing
+                    // This avoids the complex field name mapping issue
+                    row_obj.insert(
+                        "fields_count".to_string(),
+                        serde_json::Value::Number(row.fields.len().into()),
+                    );
+                    row_obj.insert(
+                        "fields".to_string(),
+                        serde_json::Value::String(format!("{} fields", row.fields.len())),
+                    );
+                    rows_array.push(serde_json::Value::Object(row_obj));
+                }
+                json_table.insert("rows".to_string(), serde_json::Value::Array(rows_array));
+
+                Ok(serde_json::Value::Object(json_table))
+            }
             RustTwPrim::NOTHING(_) => Ok(serde_json::Value::Null),
             RustTwPrim::VARIANT(_, boxed_prim) => {
                 // Recursively convert the inner primitive to JSON
