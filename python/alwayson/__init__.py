@@ -8,6 +8,7 @@ enabling efficient encoding and decoding of ThingWorx AlwaysOn protocol messages
 from ._native import (
     AlwaysOnError,
     BaseType,
+    InfoTable,
     TwPrim,
     TwxEvent,
     TwxMessage,
@@ -19,6 +20,7 @@ from ._native import (
 __all__ = [
     "AlwaysOnError",
     "BaseType",
+    "InfoTable",
     "TwPrim",
     "TwxEvent",
     "TwxMessage",

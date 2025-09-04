@@ -623,6 +623,102 @@ impl PyTwxProperty {
     }
 }
 
+#[pyclass(name = "InfoTable")]
+#[derive(Clone, Debug)]
+pub struct PyInfoTable {
+    inner: RustInfoTable,
+}
+
+#[pymethods]
+impl PyInfoTable {
+    #[staticmethod]
+    fn from_bytes(data: &[u8]) -> PyResult<Self> {
+        match RustInfoTable::from_bytes(data) {
+            Ok((infotable, _consumed)) => Ok(PyInfoTable { inner: infotable }),
+            Err(e) => Err(PyValueError::new_err(format!(
+                "InfoTable deserialization error: {}",
+                e
+            ))),
+        }
+    }
+
+    fn to_bytes<'py>(&self, py: Python<'py>) -> PyResult<Bound<'py, PyBytes>> {
+        let mut content = BytesMut::new();
+        match self.inner.to_bytes(&mut content) {
+            Ok(_) => Ok(PyBytes::new_bound(py, &content)),
+            Err(e) => Err(PyValueError::new_err(format!(
+                "InfoTable serialization error: {}",
+                e
+            ))),
+        }
+    }
+
+    fn get_row_count(&self) -> usize {
+        self.inner.rows.len()
+    }
+
+    fn get_field_count(&self) -> usize {
+        self.inner.datashape.entries.len()
+    }
+
+    fn get_datashape_name(&self) -> Option<String> {
+        self.inner.datashape.name.clone()
+    }
+
+    fn to_json(&self) -> PyResult<String> {
+        // Convert InfoTable to JSON representation
+        let mut json_table = serde_json::Map::new();
+
+        // Add data shape information
+        let mut fields = serde_json::Map::new();
+        for (field_name, field_def) in &self.inner.datashape.entries {
+            let mut field_info = serde_json::Map::new();
+            field_info.insert(
+                "baseType".to_string(),
+                serde_json::Value::String(format!("{:?}", field_def.entry_type)),
+            );
+            field_info.insert(
+                "description".to_string(),
+                serde_json::Value::String(field_def.description.clone()),
+            );
+            fields.insert(field_name.clone(), serde_json::Value::Object(field_info));
+        }
+        json_table.insert("dataShape".to_string(), serde_json::Value::Object(fields));
+
+        // Add rows data - simplified for now
+        let mut rows_array = Vec::new();
+        for row in &self.inner.rows {
+            let mut row_obj = serde_json::Map::new();
+            row_obj.insert(
+                "fields_count".to_string(),
+                serde_json::Value::Number(row.fields.len().into()),
+            );
+            rows_array.push(serde_json::Value::Object(row_obj));
+        }
+        json_table.insert("rows".to_string(), serde_json::Value::Array(rows_array));
+
+        serde_json::to_string(&json_table)
+            .map_err(|e| PyValueError::new_err(format!("JSON serialization error: {e}")))
+    }
+
+    fn __str__(&self) -> String {
+        format!(
+            "InfoTable(rows={}, fields={})",
+            self.inner.rows.len(),
+            self.inner.datashape.entries.len()
+        )
+    }
+
+    fn __repr__(&self) -> String {
+        format!(
+            "InfoTable(rows={}, fields={}, name={:?})",
+            self.inner.rows.len(),
+            self.inner.datashape.entries.len(),
+            self.inner.datashape.name
+        )
+    }
+}
+
 #[pyclass(name = "AlwaysOnError")]
 #[derive(Debug)]
 pub struct PyAlwaysOnError {
@@ -648,7 +744,7 @@ impl PyAlwaysOnError {
 /// Python bindings for ThingWorx AlwaysOn protocol codec
 #[pymodule]
 fn _native<'py>(_py: Python<'py>, m: &Bound<'py, PyModule>) -> PyResult<()> {
-    m.setattr("__version__", "0.3.1")?;
+    m.setattr("__version__", "0.4.0")?;
 
     m.add_class::<PyBaseType>()?;
     m.add_class::<PyTwPrim>()?;
@@ -656,6 +752,7 @@ fn _native<'py>(_py: Python<'py>, m: &Bound<'py, PyModule>) -> PyResult<()> {
     m.add_class::<PyTwxEvent>()?;
     m.add_class::<PyTwxService>()?;
     m.add_class::<PyTwxProperty>()?;
+    m.add_class::<PyInfoTable>()?;
     m.add_class::<PyAlwaysOnError>()?;
 
     Ok(())
