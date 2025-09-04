@@ -4,7 +4,7 @@ build-backend = "maturin"
 
 [project]
 name = "alwayson_py"
-version = "0.2.2"
+version = "0.3.0"
 description = "Python bindings for ThingWorx AlwaysOn protocol encoding/decoding"
 authors = [{ name = "Desheng Xu", email = "xudesheng@gmail.com" }]
 readme = "README.md"

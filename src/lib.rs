@@ -169,7 +169,12 @@ impl PyTwPrim {
             RustTwPrim::BLOB(_, _) => "BLOB".to_string(),
             RustTwPrim::LOCATION(..) => "LOCATION".to_string(),
             RustTwPrim::INFOTABLE(_, _) => "INFOTABLE".to_string(),
-            RustTwPrim::VARIANT(_, _) => "VARIANT".to_string(),
+            RustTwPrim::VARIANT(_, boxed_prim) => {
+                let wrapped_prim = PyTwPrim {
+                    inner: (**boxed_prim).clone(),
+                };
+                wrapped_prim.get_type()
+            }
             RustTwPrim::NOTHING(_) => "NOTHING".to_string(),
         }
     }
@@ -223,6 +228,18 @@ impl PyTwPrim {
                     inner: (**boxed_prim).clone(),
                 };
                 wrapped_prim.get_type()
+            }
+            _ => self.get_type(),
+        }
+    }
+
+    fn get_full_type(&self) -> String {
+        match &self.inner {
+            RustTwPrim::VARIANT(_, boxed_prim) => {
+                let wrapped_prim = PyTwPrim {
+                    inner: (**boxed_prim).clone(),
+                };
+                format!("VARIANT::{}", wrapped_prim.get_full_type())
             }
             _ => self.get_type(),
         }
@@ -560,7 +577,7 @@ impl PyAlwaysOnError {
 /// Python bindings for ThingWorx AlwaysOn protocol codec
 #[pymodule]
 fn _native<'py>(_py: Python<'py>, m: &Bound<'py, PyModule>) -> PyResult<()> {
-    m.setattr("__version__", "0.2.2")?;
+    m.setattr("__version__", "0.3.0")?;
 
     m.add_class::<PyBaseType>()?;
     m.add_class::<PyTwPrim>()?;
