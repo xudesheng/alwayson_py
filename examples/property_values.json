@@ -1,0 +1,269 @@
+{
+    "dataShape": {
+        "fieldDefinitions": {
+            "name": {
+                "name": "name",
+                "description": "Thing name",
+                "baseType": "STRING",
+                "ordinal": 0,
+                "aspects": {
+                    "isReadOnly": true,
+                    "isPersistent": false,
+                    "isBuiltIn": true
+                }
+            },
+            "description": {
+                "name": "description",
+                "description": "Thing description",
+                "baseType": "STRING",
+                "ordinal": 0,
+                "aspects": {
+                    "isReadOnly": true,
+                    "isPersistent": false,
+                    "isBuiltIn": true
+                }
+            },
+            "thingTemplate": {
+                "name": "thingTemplate",
+                "description": "Thing Template",
+                "baseType": "THINGTEMPLATENAME",
+                "ordinal": 0,
+                "aspects": {
+                    "isReadOnly": true,
+                    "isPersistent": false,
+                    "isBuiltIn": true
+                }
+            },
+            "tags": {
+                "name": "tags",
+                "description": "Thing Tags",
+                "baseType": "TAGS",
+                "ordinal": 0,
+                "aspects": {
+                    "isReadOnly": true,
+                    "isPersistent": false,
+                    "tagType": "ModelTags",
+                    "isBuiltIn": true
+                }
+            },
+            "isReporting": {
+                "name": "isReporting",
+                "description": "Health of this device's connection",
+                "baseType": "BOOLEAN",
+                "ordinal": 0,
+                "aspects": {
+                    "isReadOnly": true,
+                    "defaultValue": false,
+                    "isPersistent": false
+                }
+            },
+            "reportingLastEvaluation": {
+                "name": "reportingLastEvaluation",
+                "description": "Last time evaluated for Reporting",
+                "baseType": "DATETIME",
+                "ordinal": 0,
+                "aspects": {
+                    "isReadOnly": true,
+                    "defaultValue": 0,
+                    "isPersistent": true
+                }
+            },
+            "reportingLastChange": {
+                "name": "reportingLastChange",
+                "description": "Last time isReporting value changed",
+                "baseType": "DATETIME",
+                "ordinal": 0,
+                "aspects": {
+                    "isReadOnly": true,
+                    "defaultValue": 0,
+                    "isPersistent": true
+                }
+            },
+            "isConnected": {
+                "name": "isConnected",
+                "description": "Flag indicating if connected or not",
+                "baseType": "BOOLEAN",
+                "ordinal": 0,
+                "aspects": {
+                    "isReadOnly": true,
+                    "defaultValue": false,
+                    "isPersistent": false
+                }
+            },
+            "lastConnection": {
+                "name": "lastConnection",
+                "description": "Last connection time",
+                "baseType": "DATETIME",
+                "ordinal": 0,
+                "aspects": {
+                    "isReadOnly": true,
+                    "defaultValue": 0,
+                    "isPersistent": true
+                }
+            },
+            "isInitialStateSynchronized": {
+                "name": "isInitialStateSynchronized",
+                "description": "Flag indicating if initial sync happened or not",
+                "baseType": "BOOLEAN",
+                "ordinal": 0,
+                "aspects": {
+                    "isReadOnly": true,
+                    "defaultValue": false,
+                    "isPersistent": false
+                }
+            },
+            "lastInitialStateSynchronized": {
+                "name": "lastInitialStateSynchronized",
+                "description": "DateTime flag indicating last time when edge device synchronized its state with platform",
+                "baseType": "DATETIME",
+                "ordinal": 0,
+                "aspects": {
+                    "isReadOnly": true,
+                    "defaultValue": 0,
+                    "isPersistent": true
+                }
+            },
+            "TotalFlow": {
+                "name": "TotalFlow",
+                "description": "",
+                "baseType": "NUMBER",
+                "ordinal": 1,
+                "aspects": {
+                    "isReadOnly": true,
+                    "dataChangeThreshold": 0,
+                    "isPersistent": false,
+                    "isLogged": true,
+                    "dataChangeType": "VALUE",
+                    "cacheTime": 0
+                }
+            },
+            "Temperature": {
+                "name": "Temperature",
+                "description": "",
+                "baseType": "NUMBER",
+                "ordinal": 3,
+                "aspects": {
+                    "isReadOnly": true,
+                    "dataChangeThreshold": 0,
+                    "isPersistent": false,
+                    "isLogged": true,
+                    "dataChangeType": "VALUE",
+                    "cacheTime": 0
+                }
+            },
+            "FaultStatus": {
+                "name": "FaultStatus",
+                "description": "",
+                "baseType": "BOOLEAN",
+                "ordinal": 8,
+                "aspects": {
+                    "isReadOnly": false,
+                    "isPersistent": false,
+                    "isLogged": false,
+                    "dataChangeType": "VALUE",
+                    "cacheTime": 0
+                }
+            },
+            "InletValve": {
+                "name": "InletValve",
+                "description": "",
+                "baseType": "BOOLEAN",
+                "ordinal": 7,
+                "aspects": {
+                    "isReadOnly": false,
+                    "isPersistent": false,
+                    "isLogged": false,
+                    "dataChangeType": "VALUE",
+                    "cacheTime": 0
+                }
+            },
+            "TemperatureLimit": {
+                "name": "TemperatureLimit",
+                "description": "",
+                "baseType": "NUMBER",
+                "ordinal": 2,
+                "aspects": {
+                    "isReadOnly": false,
+                    "dataChangeThreshold": 0,
+                    "defaultValue": 440,
+                    "isPersistent": false,
+                    "isLogged": true,
+                    "dataChangeType": "VALUE",
+                    "cacheTime": 0
+                }
+            },
+            "Pressure": {
+                "name": "Pressure",
+                "description": "",
+                "baseType": "NUMBER",
+                "ordinal": 4,
+                "aspects": {
+                    "isReadOnly": true,
+                    "dataChangeThreshold": 0,
+                    "isPersistent": false,
+                    "isLogged": true,
+                    "dataChangeType": "VALUE",
+                    "cacheTime": 0
+                }
+            },
+            "Logfile": {
+                "name": "Logfile",
+                "description": "",
+                "baseType": "STRING",
+                "ordinal": 5,
+                "aspects": {
+                    "isReadOnly": false,
+                    "isPersistent": false,
+                    "isLogged": false,
+                    "dataChangeType": "VALUE",
+                    "cacheTime": 0
+                }
+            },
+            "Location": {
+                "name": "Location",
+                "description": "",
+                "baseType": "LOCATION",
+                "ordinal": 6,
+                "aspects": {
+                    "isReadOnly": false,
+                    "isPersistent": false,
+                    "isLogged": false,
+                    "dataChangeType": "VALUE",
+                    "cacheTime": 0
+                }
+            }
+        }
+    },
+    "rows": [
+        {
+            "name": "SteamSensor1",
+            "description": "",
+            "thingTemplate": "RemoteThingWithTunnelsAndFileTransfer",
+            "tags": [
+                {
+                    "vocabulary": "Applications",
+                    "vocabularyTerm": "SteamSensor"
+                }
+            ],
+            "isReporting": false,
+            "reportingLastEvaluation": 1756965250187,
+            "reportingLastChange": 1756965250187,
+            "isConnected": false,
+            "lastConnection": 1756909626551,
+            "isInitialStateSynchronized": false,
+            "lastInitialStateSynchronized": 1756909627613,
+            "TotalFlow": 9.477017619403554,
+            "Temperature": 432,
+            "FaultStatus": false,
+            "InletValve": false,
+            "TemperatureLimit": 440,
+            "Pressure": 22.111189678828786,
+            "Logfile": "",
+            "Location": {
+                "latitude": 40.06498,
+                "longitude": -75.68393,
+                "elevation": 0
+            }
+        }
+    ]
+}
